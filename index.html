@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SiamBook - ร้านหนังสือออนไลน์</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Prompt -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fdf8f6',
+                            100: '#f2e8e5',
+                            500: '#e0582f', // Orange/Red tone
+                            600: '#c5441e',
+                            900: '#431407',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
+        .book-card:hover .add-btn {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans flex flex-col min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <!-- Logo -->
+                <div class="flex items-center space-x-2 cursor-pointer" onclick="window.location.reload()">
+                    <i class="fa-solid fa-book-open text-brand-500 text-2xl"></i>
+                    <span class="text-xl font-bold text-gray-900">Siam<span class="text-brand-500">Book</span></span>
+                </div>
+
+                <!-- Search Bar (Desktop) -->
+                <div class="hidden md:flex flex-1 mx-10 max-w-xl relative">
+                    <input type="text" id="searchInput" placeholder="ค้นหาชื่อหนังสือ, ผู้แต่ง..." 
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
+                    <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+
+                <!-- Icons & Mobile Menu Button -->
+                <div class="flex items-center space-x-6">
+                    <button class="relative hover:text-brand-500 transition group">
+                        <i class="fa-solid fa-shopping-cart text-xl"></i>
+                        <span id="cartCount" class="absolute -top-2 -right-2 bg-brand-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center transform group-hover:scale-110 transition">0</span>
+                    </button>
+                    <button class="md:hidden text-gray-600 focus:outline-none" onclick="toggleMobileMenu()">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Search (Visible on mobile only) -->
+            <div class="md:hidden mt-3 pb-2">
+                <div class="relative">
+                    <input type="text" id="mobileSearchInput" placeholder="ค้นหาหนังสือ..." 
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-brand-500">
+                    <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Dropdown -->
+    <div id="mobileMenu" class="hidden bg-white border-b md:hidden">
+        <div class="px-4 py-2 space-y-2">
+            <a href="#" class="block py-2 text-brand-500 font-medium">หน้าแรก</a>
+            <a href="#" class="block py-2 text-gray-600 hover:text-brand-500">โปรโมชั่น</a>
+            <a href="#" class="block py-2 text-gray-600 hover:text-brand-500">บทความ</a>
+            <a href="#" class="block py-2 text-gray-600 hover:text-brand-500">ติดต่อเรา</a>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <header class="bg-brand-500 text-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-brand-900 to-transparent opacity-40"></div>
+        <div class="container mx-auto px-4 py-12 md:py-20 relative z-10 flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 text-center md:text-left mb-8 md:mb-0">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">เปิดโลกจินตนาการ<br>ไปกับหนังสือเล่มโปรด</h1>
+                <p class="text-lg md:text-xl mb-8 text-brand-100">ลดสูงสุด 20% สำหรับสมาชิกใหม่ ช้อปเลยวันนี้!</p>
+                <button onclick="scrollToBooks()" class="bg-white text-brand-600 font-bold py-3 px-8 rounded-full hover:bg-brand-50 transition shadow-lg transform hover:-translate-y-1">
+                    เลือกซื้อหนังสือ
+                </button>
+            </div>
+            <div class="md:w-1/2 flex justify-center">
+                <!-- Decorative Book Stack (CSS only simple representation) -->
+                <div class="relative w-64 h-80 bg-white rounded-r-lg shadow-2xl transform rotate-3 border-l-8 border-gray-800 flex items-center justify-center">
+                     <span class="text-gray-300 text-6xl"><i class="fa-solid fa-book"></i></span>
+                     <div class="absolute -bottom-4 -right-4 w-64 h-80 bg-brand-100 rounded-r-lg -z-10 rounded-lg"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-10 flex-grow" id="shopSection">
+        
+        <!-- Filter Categories -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 md:mb-0 border-l-4 border-brand-500 pl-3">หนังสือแนะนำ</h2>
+            <div class="flex flex-wrap justify-center gap-2" id="categoryFilters">
+                <button class="filter-btn active bg-brand-500 text-white px-4 py-2 rounded-full text-sm font-medium transition hover:shadow-md" data-category="all">ทั้งหมด</button>
+                <button class="filter-btn bg-white text-gray-600 border border-gray-200 px-4 py-2 rounded-full text-sm font-medium transition hover:border-brand-500 hover:text-brand-500" data-category="fiction">นิยาย/วรรณกรรม</button>
+                <button class="filter-btn bg-white text-gray-600 border border-gray-200 px-4 py-2 rounded-full text-sm font-medium transition hover:border-brand-500 hover:text-brand-500" data-category="self-help">พัฒนาตนเอง</button>
+                <button class="filter-btn bg-white text-gray-600 border border-gray-200 px-4 py-2 rounded-full text-sm font-medium transition hover:border-brand-500 hover:text-brand-500" data-category="manga">การ์ตูน</button>
+                <button class="filter-btn bg-white text-gray-600 border border-gray-200 px-4 py-2 rounded-full text-sm font-medium transition hover:border-brand-500 hover:text-brand-500" data-category="business">ธุรกิจ/การเงิน</button>
+            </div>
+        </div>
+
+        <!-- Book Grid -->
+        <div id="bookGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Books will be inserted here by JavaScript -->
+        </div>
+
+        <!-- Empty State (Hidden by default) -->
+        <div id="emptyState" class="hidden text-center py-20">
+            <i class="fa-regular fa-folder-open text-6xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500 text-lg">ไม่พบหนังสือที่คุณค้นหา</p>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 py-10">
+        <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+                <h3 class="text-white text-xl font-bold mb-4">SiamBook</h3>
+                <p class="text-sm leading-relaxed">ร้านหนังสือออนไลน์ที่รวบรวมหนังสือดีๆ จากทั่วทุกมุมโลก มาส่งตรงถึงมือคุณ พร้อมบริการด้วยใจ</p>
+            </div>
+            <div>
+                <h3 class="text-white text-lg font-bold mb-4">ลิงก์ด่วน</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="#" class="hover:text-brand-500 transition">เกี่ยวกับเรา</a></li>
+                    <li><a href="#" class="hover:text-brand-500 transition">วิธีการสั่งซื้อ</a></li>
+                    <li><a href="#" class="hover:text-brand-500 transition">นโยบายความเป็นส่วนตัว</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-white text-lg font-bold mb-4">ติดตามเรา</h3>
+                <div class="flex space-x-4">
+                    <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-brand-500 transition text-white"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-brand-500 transition text-white"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-brand-500 transition text-white"><i class="fa-brands fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
+            <p>&copy; 2023 SiamBook Bookstore. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <div class="bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3">
+            <i class="fa-solid fa-check-circle text-green-400"></i>
+            <span>เพิ่มลงตะกร้าเรียบร้อยแล้ว</span>
+        </div>
+    </div>
+
+    <!-- JavaScript logic -->
+    <script>
+        // Mock Data: รายการหนังสือ
+        const books = [
+            { id: 1, title: "คิดแบบยิว ทำแบบญี่ปุ่น", author: "ฮอนดะ เคน", price: 250, category: "self-help", rating: 5, image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400" },
+            { id: 2, title: "Harry Potter 1", author: "J.K. Rowling", price: 395, category: "fiction", rating: 5, image: "https://images.unsplash.com/photo-1626618012641-bfbca5a31239?auto=format&fit=crop&q=80&w=400" },
+            { id: 3, title: "Atomic Habits", author: "James Clear", price: 285, category: "self-help", rating: 4.5, image: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=400" },
+            { id: 4, title: "พ่อรวยสอนลูก", author: "Robert Kiyosaki", price: 320, category: "business", rating: 4, image: "https://images.unsplash.com/photo-1554774853-719586f8c277?auto=format&fit=crop&q=80&w=400" },
+            { id: 5, title: "One Piece Vol. 100", author: "Eiichiro Oda", price: 75, category: "manga", rating: 5, image: "https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?auto=format&fit=crop&q=80&w=400" },
+            { id: 6, title: "Psychology of Money", author: "Morgan Housel", price: 290, category: "business", rating: 4.5, image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&q=80&w=400" },
+            { id: 7, title: "Sapiens", author: "Yuval Noah Harari", price: 450, category: "fiction", rating: 4, image: "https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&q=80&w=400" },
+            { id: 8, title: "Spy x Family 1", author: "Tatsuya Endo", price: 95, category: "manga", rating: 5, image: "https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&q=80&w=400" },
+        ];
+
+        // State Variables
+        let currentCategory = 'all';
+        let searchQuery = '';
+        let cartItems = 0;
+
+        // Elements
+        const bookGrid = document.getElementById('bookGrid');
+        const emptyState = document.getElementById('emptyState');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const searchInput = document.getElementById('searchInput');
+        const mobileSearchInput = document.getElementById('mobileSearchInput');
+        const cartCountEl = document.getElementById('cartCount');
+        const toast = document.getElementById('toast');
+
+        // Initial Render
+        renderBooks();
+
+        // Functions
+        function renderBooks() {
+            bookGrid.innerHTML = '';
+            
+            const filteredBooks = books.filter(book => {
+                const matchCategory = currentCategory === 'all' || book.category === currentCategory;
+                const matchSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                  book.author.toLowerCase().includes(searchQuery.toLowerCase());
+                return matchCategory && matchSearch;
+            });
+
+            if (filteredBooks.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                filteredBooks.forEach(book => {
+                    const stars = generateStars(book.rating);
+                    const card = `
+                        <div class="book-card bg-white rounded-xl shadow-sm hover:shadow-xl transition duration-300 overflow-hidden border border-gray-100 flex flex-col group h-full">
+                            <div class="relative h-64 overflow-hidden bg-gray-100">
+                                <img src="${book.image}" alt="${book.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                                <div class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-bold text-brand-600 shadow-sm">
+                                    ${getCategoryName(book.category)}
+                                </div>
+                            </div>
+                            <div class="p-4 flex flex-col flex-grow">
+                                <h3 class="font-bold text-lg text-gray-800 line-clamp-1 mb-1" title="${book.title}">${book.title}</h3>
+                                <p class="text-gray-500 text-sm mb-2">${book.author}</p>
+                                <div class="flex text-yellow-400 text-xs mb-3">
+                                    ${stars}
+                                </div>
+                                <div class="mt-auto flex justify-between items-center">
+                                    <span class="text-xl font-bold text-brand-600">฿${book.price}</span>
+                                    <button onclick="addToCart(${book.id})" class="bg-gray-900 text-white p-2 rounded-full hover:bg-brand-500 transition shadow-md active:scale-95">
+                                        <i class="fa-solid fa-cart-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    bookGrid.innerHTML += card;
+                });
+            }
+        }
+
+        function generateStars(rating) {
+            let html = '';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= rating) {
+                    html += '<i class="fa-solid fa-star"></i>';
+                } else if (i - 0.5 === rating) {
+                    html += '<i class="fa-solid fa-star-half-stroke"></i>';
+                } else {
+                    html += '<i class="fa-regular fa-star text-gray-300"></i>';
+                }
+            }
+            return html;
+        }
+
+        function getCategoryName(cat) {
+            const map = {
+                'fiction': 'นิยาย',
+                'self-help': 'พัฒนาตนเอง',
+                'business': 'ธุรกิจ',
+                'manga': 'การ์ตูน',
+            };
+            return map[cat] || cat;
+        }
+
+        function addToCart(id) {
+            cartItems++;
+            cartCountEl.innerText = cartItems;
+            
+            // Animation for cart badge
+            cartCountEl.classList.add('scale-125');
+            setTimeout(() => cartCountEl.classList.remove('scale-125'), 200);
+
+            // Show Toast
+            showToast();
+        }
+
+        function showToast() {
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2000);
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        function scrollToBooks() {
+            document.getElementById('shopSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Event Listeners
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Update active button UI
+                filterBtns.forEach(b => {
+                    b.classList.remove('bg-brand-500', 'text-white');
+                    b.classList.add('bg-white', 'text-gray-600', 'border-gray-200');
+                });
+                btn.classList.remove('bg-white', 'text-gray-600', 'border-gray-200');
+                btn.classList.add('bg-brand-500', 'text-white');
+
+                // Filter logic
+                currentCategory = btn.getAttribute('data-category');
+                renderBooks();
+            });
+        });
+
+        const handleSearch = (e) => {
+            searchQuery = e.target.value;
+            renderBooks();
+        };
+
+        searchInput.addEventListener('input', handleSearch);
+        mobileSearchInput.addEventListener('input', handleSearch);
+
+    </script>
+</body>
+</html>
